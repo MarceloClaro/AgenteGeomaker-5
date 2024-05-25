@@ -1,5 +1,5 @@
-streamlit==1.34.0
-groq==0.5.0
+streamlit
+groq
 toml==0.10.2
 pydub
 aiohttp==3.9.3
@@ -61,9 +61,9 @@ jupyter_client==7.4.3
 jupyter_core==4.11.2
 jupyterlab-pygments==0.2.2
 jupyterlab-widgets==3.0.3
-langchain==0.1.5
-langchain-community==0.0.19
-langchain-core==0.1.21
+langchain
+langchain-community
+langchain-core
 langchain-groq==0.0.1
 langsmith==0.0.87
 markdown-it-py==3.0.0
