@@ -217,10 +217,7 @@ if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 else:
     for message in st.session_state.chat_history:
-        memory.save_context(
-            {'input': message['human']},
-            {'output': message['AI']}
-        )
+        memory.save_context(message['human'], message['AI'])
 
 container_saida = st.container()
 
@@ -235,12 +232,14 @@ if fetch_clicked:
 if refine_clicked:
     if st.session_state.resposta_assistente:
         st.session_state.resposta_refinada = refine_response(st.session_state.descricao_especialista_ideal, st.session_state.resposta_assistente, user_input, user_prompt, model_name, temperature, groq_api_key, references_file)
+        st.session_state.chat_history.append({'human': user_input, 'AI': st.session_state.resposta_refinada})
     else:
         st.warning("Por favor, busque uma resposta antes de refinar.")
 
 if evaluate_clicked:
     if st.session_state.resposta_assistente and st.session_state.descricao_especialista_ideal:
         st.session_state.rag_resposta = evaluate_response_with_rag(user_input, user_prompt, st.session_state.descricao_especialista_ideal, st.session_state.resposta_assistente, model_name, temperature, groq_api_key)
+        st.session_state.chat_history.append({'human': user_input, 'AI': st.session_state.rag_resposta})
     else:
         st.warning("Por favor, busque uma resposta e forneça uma descrição do especialista antes de avaliar com RAG.")
 
