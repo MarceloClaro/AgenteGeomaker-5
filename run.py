@@ -159,8 +159,8 @@ def evaluate_response_with_rag(user_input: str, user_prompt: str, expert_descrip
 
 agent_options = load_agent_options()
 
-st.image('updating.gif', width=300, caption='Laboratório de Educação e Inteligência Artificial - Geomaker.', use_column_width='always', output_format='auto')
-st.markdown("<h1 style='text-align: center;'>Agentes Experts Geomaker 5</h1>", unsafe_allow_html=True)
+st.image('updating.gif', width=300, caption='Laboratário de Educação e Inteligência Artificial - Geomaker.', use_column_width='always', output_format='auto')
+st.markdown("<h1 style='text-align: center;'>Agentes Experts Geomaker</h1>", unsafe_allow_html=True)
 
 st.markdown("<h2 style='text-align: center;'>Utilize o Rational Agent Generator (RAG) para avaliar a resposta do especialista e garantir qualidade e precisão.</h2>", unsafe_allow_html=True)
 
@@ -202,57 +202,55 @@ with col1:
 
     references_file = st.file_uploader("Upload do arquivo JSON com referências (opcional)", type="json", key="arquivo_referencias")
 
-with col2:
-    if 'resposta_assistente' not in st.session_state:
-        st.session_state.resposta_assistente = ""
-    if 'descricao_especialista_ideal' not in st.session_state:
-        st.session_state.descricao_especialista_ideal = ""
-    if 'resposta_refinada' not in st.session_state:
-        st.session_state.resposta_refinada = ""
-    if 'resposta_original' not in st.session_state:
-        st.session_state.resposta_original = ""
-    if 'rag_resposta' not in st.session_state:
-        st.session_state.rag_resposta = ""
+if 'resposta_assistente' not in st.session_state:
+    st.session_state.resposta_assistente = ""
+if 'descricao_especialista_ideal' not in st.session_state:
+    st.session_state.descricao_especialista_ideal = ""
+if 'resposta_refinada' not in st.session_state:
+    st.session_state.resposta_refinada = ""
+if 'resposta_original' not in st.session_state:
+    st.session_state.resposta_original = ""
+if 'rag_resposta' not in st.session_state:
+    st.session_state.rag_resposta = ""
 
-    user_question = st.text_input("Ask a question:")
+if 'chat_history' not in st.session_state:
+    st.session_state.chat_history = []
+else:
+    for message in st.session_state.chat_history:
+        memory.save_context(
+            {'input': message['human']},
+            {'output': message['AI']}
+        )
 
-    if 'chat_history' not in st.session_state:
-        st.session_state.chat_history = []
+container_saida = st.container()
+
+if fetch_clicked:
+    if references_file is None:
+        st.warning("Não foi fornecido um arquivo de referências. Certifique-se de fornecer uma resposta detalhada e precisa, mesmo sem o uso de fontes externas. Saída sempre traduzido para o portugues brasileiro com tom profissional.")
+    st.session_state.descricao_especialista_ideal, st.session_state.resposta_assistente = fetch_assistant_response(user_input, user_prompt, model_name, temperature, agent_selection, groq_api_key, memory)
+    st.session_state.resposta_original = st.session_state.resposta_assistente
+    st.session_state.resposta_refinada = ""
+    st.session_state.chat_history.append({'human': user_input, 'AI': st.session_state.resposta_assistente})
+
+if refine_clicked:
+    if st.session_state.resposta_assistente:
+        st.session_state.resposta_refinada = refine_response(st.session_state.descricao_especialista_ideal, st.session_state.resposta_assistente, user_input, user_prompt, model_name, temperature, groq_api_key, references_file)
     else:
-        for message in st.session_state.chat_history:
-            memory.save_context(
-                {'input': message['human']},
-                {'output': message['AI']}
-            )
+        st.warning("Por favor, busque uma resposta antes de refinar.")
 
-    container_saida = st.container()
+if evaluate_clicked:
+    if st.session_state.resposta_assistente and st.session_state.descricao_especialista_ideal:
+        st.session_state.rag_resposta = evaluate_response_with_rag(user_input, user_prompt, st.session_state.descricao_especialista_ideal, st.session_state.resposta_assistente, model_name, temperature, groq_api_key)
+    else:
+        st.warning("Por favor, busque uma resposta e forneça uma descrição do especialista antes de avaliar com RAG.")
 
-    if fetch_clicked:
-        if references_file is None:
-            st.warning("Não foi fornecido um arquivo de referências. Certifique-se de fornecer uma resposta detalhada e precisa, mesmo sem o uso de fontes externas. Saída sempre traduzido para o portugues brasileiro com tom profissional.")
-        st.session_state.descricao_especialista_ideal, st.session_state.resposta_assistente = fetch_assistant_response(user_input, user_prompt, model_name, temperature, agent_selection, groq_api_key, memory)
-        st.session_state.resposta_original = st.session_state.resposta_assistente
-        st.session_state.resposta_refinada = ""
-
-    if refine_clicked:
-        if st.session_state.resposta_assistente:
-            st.session_state.resposta_refinada = refine_response(st.session_state.descricao_especialista_ideal, st.session_state.resposta_assistente, user_input, user_prompt, model_name, temperature, groq_api_key, references_file)
-        else:
-            st.warning("Por favor, busque uma resposta antes de refinar.")
-
-    if evaluate_clicked:
-        if st.session_state.resposta_assistente and st.session_state.descricao_especialista_ideal:
-            st.session_state.rag_resposta = evaluate_response_with_rag(user_input, user_prompt, st.session_state.descricao_especialista_ideal, st.session_state.resposta_assistente, model_name, temperature, groq_api_key)
-        else:
-            st.warning("Por favor, busque uma resposta e forneça uma descrição do especialista antes de avaliar com RAG.")
-
-    with container_saida:
-        st.write(f"**Análise do Especialista:**\n{st.session_state.descricao_especialista_ideal}")
-        st.write(f"\n**Resposta do Especialista:**\n{st.session_state.resposta_original}")
-        if st.session_state.resposta_refinada:
-            st.write(f"\n**Resposta Refinada:**\n{st.session_state.resposta_refinada}")
-        if st.session_state.rag_resposta:
-            st.write(f"\n**Avaliação com RAG:**\n{st.session_state.rag_resposta}")
+with container_saida:
+    st.write(f"**Análise do Especialista:**\n{st.session_state.descricao_especialista_ideal}")
+    st.write(f"\n**Resposta do Especialista:**\n{st.session_state.resposta_original}")
+    if st.session_state.resposta_refinada:
+        st.write(f"\n**Resposta Refinada:**\n{st.session_state.resposta_refinada}")
+    if st.session_state.rag_resposta:
+        st.write(f"\n**Avaliação com RAG:**\n{st.session_state.rag_resposta}")
 
 if refresh_clicked:
     st.session_state.clear()
@@ -283,4 +281,6 @@ Whatsapp: (88)981587145
 Instagram: https://www.instagram.com/marceloclaro.geomaker/
 """)
 
-
+# Main function
+if __name__ == "__main__":
+    main()
