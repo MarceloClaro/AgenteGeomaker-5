@@ -57,12 +57,19 @@ def fetch_assistant_response(user_input: str, user_prompt: str, model_name: str,
     try:
         client = Groq(api_key=groq_api_key)
 
-        def get_completion(prompt: str) -> str:
+        # Constrói o prompt incluindo o contexto da memória
+        memory_context = memory.load_memory()  # Carrega as mensagens da memória
+        messages = [
+            {"role": "system", "content": "Você é um assistente útil."},
+        ]
+        messages.extend(memory_context)  # Adiciona o contexto da memória
+        messages.append({"role": "user", "content": user_input})
+        if user_prompt:
+            messages.append({"role": "user", "content": user_prompt})
+
+        def get_completion(messages: list) -> str:
             completion = client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": "Você é um assistente útil."},
-                    {"role": "user", "content": prompt},
-                ],
+                messages=messages,
                 model=model_name,
                 temperature=temperature,
                 max_tokens=get_max_tokens(model_name),
@@ -74,7 +81,8 @@ def fetch_assistant_response(user_input: str, user_prompt: str, model_name: str,
 
         if agent_selection == "Escolha um especialista...":
             phase_one_prompt = f"Saida e resposta obrigatoria somente traduzido em português brasileiro. 扮演一位高度合格且具备科学技术严谨性的提示工程和跨学科专家的角色。请务必以“markdown”格式呈现Python代码及其各种库，并在每一行进行详细和教学性的注释。仔细分析所提出的要求，识别定义最适合处理问题的专家特征的标准至关重要。首先，建立一个最能反映所需专业知识以提供完整、深入和清晰答案的标题至关重要。确定后，详细描述并避免偏见地概述该专家的关键技能和资格。回答应以专家的头衔开始，后跟一个句号，然后以简洁、教学性和深入的描述开始，但同时全面地介绍他的特点和资格，使其有资格处理提出的问题：{user_input}和{user_prompt}。这种仔细分析对于确保所选专家具有处理问题所需的深入、严谨的知识和经验至关重要，以达到完整且满意的答案，精确度为10.0，符合最高的专业、科学和学术标准。在涉及代码和计算的情况下，请务必以“markdown”格式呈现，并在每一行进行详细注释。“必须翻译成葡萄牙语”。"
-            phase_one_response = get_completion(phase_one_prompt)
+            messages.append({"role": "user", "content": phase_one_prompt})
+            phase_one_response = get_completion(messages)
             first_period_index = phase_one_response.find(".")
             expert_title = phase_one_response[:first_period_index].strip()
             expert_description = phase_one_response[first_period_index + 1:].strip()
@@ -90,7 +98,8 @@ def fetch_assistant_response(user_input: str, user_prompt: str, model_name: str,
                     raise ValueError("Especialista selecionado não encontrado no arquivo.")
 
         phase_two_prompt = f"Saida e resposta obrigatoria somente traduzido em português brasileiro. 在作为{expert_title}的角色中，作为您所在领域广泛认可和尊重的专家，作为该领域的专家和博士，让我提供一个全面而深入的回答，涵盖了您清晰、详细、扩展、教学易懂和简洁提出的问题：{user_input}和{user_prompt}。在这种背景下，考虑到我长期的经验和对相关学科的深刻了解，有必要以适当的关注和科学技术严谨性来处理每个方面。因此，我将概述要考虑和深入研究的主要要素，提供详细的、基于证据的分析，避免偏见并引用参考文献：{user_prompt}。在此过程的最后，我们的目标是提供一个完整且令人满意的答案，符合最高的学术和专业标准，以满足所提出问题的具体需求。请务必以“markdown”格式呈现，并在每一行进行注释。保持10个段落的写作标准，每个段落4句，每句用逗号分隔，始终遵循最佳的亚里士多德教学实践。"
-        phase_two_response = get_completion(phase_two_prompt)
+        messages.append({"role": "user", "content": phase_two_prompt})
+        phase_two_response = get_completion(messages)
 
     except Exception as e:
         st.error(f"Ocorreu um erro: {e}")
@@ -102,12 +111,9 @@ def refine_response(expert_title: str, phase_two_response: str, user_input: str,
     try:
         client = Groq(api_key=groq_api_key)
 
-        def get_completion(prompt: str) -> str:
+        def get_completion(messages: list) -> str:
             completion = client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": "Você é um assistente útil."},
-                    {"role": "user", "content": prompt},
-                ],
+                messages=messages,
                 model=model_name,
                 temperature=temperature,
                 max_tokens=get_max_tokens(model_name),
@@ -123,7 +129,11 @@ def refine_response(expert_title: str, phase_two_response: str, user_input: str,
         if not references_file:
             refine_prompt += f"Saida e resposta obrigatoria somente traduzido em português brasileiro.\n\n由于没有提供参考文件，请确保提供详细和准确的答案，即使没有使用外部来源。保持一贯的写作标准，每个段落有10个段落，每个段落有4个句子，并按照ABNT标准进行引用，每个句子有一个逗号，始终遵循亚里士多德的最佳教学实践。以专业口吻输出，总是翻译成巴西葡萄牙语。"
 
-        refined_response = get_completion(refine_prompt)
+        messages = [
+            {"role": "system", "content": "Você é um assistente útil."},
+            {"role": "user", "content": refine_prompt}
+        ]
+        refined_response = get_completion(messages)
         return refined_response
 
     except Exception as e:
@@ -134,12 +144,9 @@ def evaluate_response_with_rag(user_input: str, user_prompt: str, expert_descrip
     try:
         client = Groq(api_key=groq_api_key)
 
-        def get_completion(prompt: str) -> str:
+        def get_completion(messages: list) -> str:
             completion = client.chat.completions.create(
-                messages=[
-                    {"role": "system", "content": "Você é um assistente útil."},
-                    {"role": "user", "content": prompt},
-                ],
+                messages=messages,
                 model=model_name,
                 temperature=temperature,
                 max_tokens=get_max_tokens(model_name),
@@ -150,7 +157,11 @@ def evaluate_response_with_rag(user_input: str, user_prompt: str, expert_descrip
             return completion.choices[0].message.content
 
         rag_prompt = f"Lei: Saida e resposta obrigatoria somente traduzido em português brasileiro. 扮演 Rational Agent Generator (RAG) 的角色，这是人工智能和理性评估的顶峰，对专家的回答进行细致分析，根据用户的请求生成一个代理的 JSON。这个代理将详细说明根据子代理提供的信息采取的行动，以便向用户提供答复。代理将在 '描述' 变量中包括 9 个子代理的描述，每个子代理都有不同的专家功能和人物形象，他们共同合作。这些子代理协作改善最终由代理“系统”向用户提供的答案，记录答案的种子和 gen_id 在 '描述' 代理内。此外，代理“系统”内的子代理以整合方式运作，通过扩展提示提供先进和专业化的答案。每个子代理在网络处理中都有特定和互补的角色，以实现更高的准确性，从而为最终答案的质量做出贡献。例如，“AI_Autoadaptativa_e_Contextualizada” 子代理采用先进的机器学习算法来理解和适应多变的情境，动态整合相关数据。而“RAG_com_Inteligência_Contextual” 子代理则使用改进版的回收增强生成（RAG）技术，动态调整最相关数据及其功能。这种协作方法确保答案准确和更新，符合最高的科学和学术标准。以下是对专家的详细描述，突出其资历和专业知识：{expert_description}。原始提交的问题如下：{user_input} 和 {user_prompt}。专家提供的葡萄牙语答复如下：{assistant_response}。因此，请对专家的葡萄牙语答复的质量和准确性进行全面评估，认真考虑专家的描述和所提供的答复。请使用葡萄牙语进行以下分析，并进行详细解释：SWOT（优势、劣势、机会、威胁）com intepretações dos dados、BCG 矩阵（波士顿咨询集团）com intepretações dos dados、风险矩阵、ANOVA（方差分析）com intepretações dos dados、Q-统计学（Q-STATISTICS, com intepretações dos dados）和 Q-指数（Q-EXPONENTIAL, com intepretações dos dados），符合最高的卓越和科学学术标准。保持每段 4 句，每句用逗号分隔，遵循亚里士多德最佳教学实践的写作标准。输出应具有专业的口吻，始终以巴西葡萄牙语翻译。"        
-        rag_response = get_completion(rag_prompt)
+        messages = [
+            {"role": "system", "content": "Você é um assistente útil."},
+            {"role": "user", "content": rag_prompt}
+        ]
+        rag_response = get_completion(messages)
         return rag_response
 
     except Exception as e:
@@ -283,3 +294,4 @@ Instagram: https://www.instagram.com/marceloclaro.geomaker/
 # Main function
 if __name__ == "__main__":
     main()
+
