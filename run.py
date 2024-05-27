@@ -58,11 +58,12 @@ def fetch_assistant_response(user_input: str, user_prompt: str, model_name: str,
         client = Groq(api_key=groq_api_key)
 
         # Constrói o prompt incluindo o contexto da memória
-        memory_context = memory.load_memory()  # Carrega as mensagens da memória
         messages = [
             {"role": "system", "content": "Você é um assistente útil."},
         ]
-        messages.extend(memory_context)  # Adiciona o contexto da memória
+        # Adiciona o contexto da memória
+        memory_messages = memory.load_context()
+        messages.extend(memory_messages)
         messages.append({"role": "user", "content": user_input})
         if user_prompt:
             messages.append({"role": "user", "content": user_prompt})
@@ -228,7 +229,7 @@ if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 else:
     for message in st.session_state.chat_history:
-        memory.save_context({"human_input": message['human']}, {"output": message['AI']})
+        memory.save_context({"input": message['human']}, {"output": message['AI']})
 
 container_saida = st.container()
 
