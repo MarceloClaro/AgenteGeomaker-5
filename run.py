@@ -62,8 +62,7 @@ def fetch_assistant_response(user_input: str, user_prompt: str, model_name: str,
             {"role": "system", "content": "Você é um assistente útil."},
         ]
         # Adiciona o contexto da memória
-        memory_context = memory.load()
-        messages.extend(memory_context)
+        messages.extend(memory.chat_memory.messages)
         messages.append({"role": "user", "content": user_input})
         if user_prompt:
             messages.append({"role": "user", "content": user_prompt})
