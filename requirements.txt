@@ -1,3 +1,4 @@
+langchain.chains.conversation.memory
 streamlit
 groq
 toml==0.10.2
