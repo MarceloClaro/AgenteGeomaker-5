@@ -9,7 +9,7 @@ from langchain_core.prompts import (
     HumanMessagePromptTemplate,
     MessagesPlaceholder,
 )
-from langchain_core.messages import SystemMessage
+from langchain_core.messages import SystemMessage, HumanMessage, AIMessage
 from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 from langchain_groq import ChatGroq
 from langchain.prompts import PromptTemplate
@@ -227,8 +227,14 @@ if 'rag_resposta' not in st.session_state:
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 else:
+    # Converte o histórico armazenado em objetos HumanMessage e AIMessage
+    chat_history = []
     for message in st.session_state.chat_history:
-        memory.save_context({"input": message['human']}, {"output": message['AI']})
+        if message['type'] == 'human':
+            chat_history.append(HumanMessage(content=message['content']))
+        elif message['type'] == 'ai':
+            chat_history.append(AIMessage(content=message['content']))
+    memory.chat_memory.messages = chat_history
 
 container_saida = st.container()
 
@@ -238,19 +244,22 @@ if fetch_clicked:
     st.session_state.descricao_especialista_ideal, st.session_state.resposta_assistente = fetch_assistant_response(user_input, user_prompt, model_name, temperature, agent_selection, groq_api_key, memory)
     st.session_state.resposta_original = st.session_state.resposta_assistente
     st.session_state.resposta_refinada = ""
-    st.session_state.chat_history.append({'human': user_input, 'AI': st.session_state.resposta_assistente})
+    st.session_state.chat_history.append({'type': 'human', 'content': user_input})
+    st.session_state.chat_history.append({'type': 'ai', 'content': st.session_state.resposta_assistente})
 
 if refine_clicked:
     if st.session_state.resposta_assistente:
         st.session_state.resposta_refinada = refine_response(st.session_state.descricao_especialista_ideal, st.session_state.resposta_assistente, user_input, user_prompt, model_name, temperature, groq_api_key, references_file)
-        st.session_state.chat_history.append({'human': user_input, 'AI': st.session_state.resposta_refinada})
+        st.session_state.chat_history.append({'type': 'human', 'content': user_input})
+        st.session_state.chat_history.append({'type': 'ai', 'content': st.session_state.resposta_refinada})
     else:
         st.warning("Por favor, busque uma resposta antes de refinar.")
 
 if evaluate_clicked:
     if st.session_state.resposta_assistente and st.session_state.descricao_especialista_ideal:
         st.session_state.rag_resposta = evaluate_response_with_rag(user_input, user_prompt, st.session_state.descricao_especialista_ideal, st.session_state.resposta_assistente, model_name, temperature, groq_api_key)
-        st.session_state.chat_history.append({'human': user_input, 'AI': st.session_state.rag_resposta})
+        st.session_state.chat_history.append({'type': 'human', 'content': user_input})
+        st.session_state.chat_history.append({'type': 'ai', 'content': st.session_state.rag_resposta})
     else:
         st.warning("Por favor, busque uma resposta e forneça uma descrição do especialista antes de avaliar com RAG.")
 
