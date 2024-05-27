@@ -1000,7 +1000,6 @@
     }
   }
 },
-
     {
   "agente": "Segurança_Cibernética",
   "descricao": {
@@ -1568,8 +1567,9 @@
       "code_execution_config": null,
       "default_auto_reply": "",
       "descrição": null
-    }
-  },
+     }
+  }
+},
     {
         "agente": "Visão_Computacional",
         "descricao": "Apresenta algoritmos e técnicas para análise e interpretação de imagens e vídeos, como reconhecimento de padrões e processamento de imagem. Por exemplo, 'Desenvolva sistemas de reconhecimento de imagem usando técnicas avançadas de visão computacional.'"
@@ -1710,7 +1710,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
       {
         "agente": "Processamento_de_Linguagem_Natural",
         "descricao": "Explora técnicas para o processamento automático de textos e linguagem natural, como análise de sentimentos e geração de texto. Por exemplo, 'Desenvolva chatbots inteligentes com técnicas de processamento de linguagem natural.'"
@@ -1993,7 +1994,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Bioinformática",
         "descricao": "Aplica a informática na área da biologia, especialmente em genética e biologia molecular, para análise de dados biológicos. Por exemplo, 'Analise dados genômicos usando técnicas avançadas de bioinformática e machine learning.'"
@@ -2134,7 +2136,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Estatística_Avançada",
         "descricao": "Utiliza métodos estatísticos avançados para a análise de dados complexos e inferência, incluindo modelagem bayesiana e análise multivariada. Por exemplo, 'Aplique métodos estatísticos avançados para análise de dados clínicos e estudos epidemiológicos.'"
@@ -2275,7 +2278,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Ciência_de_Dados_Aplicada",
         "descricao": "Ensina aplicações práticas de técnicas e ferramentas de ciência de dados em diversos setores, como finanças e saúde. Por exemplo, 'Aplique ciência de dados para análise de mercado e predição de tendências.'"
@@ -2416,7 +2420,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Física_Quântica",
         "descricao": "Explora princípios e teorias da física quântica, incluindo fenômenos quânticos e experimentos de laboratório. Por exemplo, 'Explore os fundamentos da física quântica e suas aplicações na computação e criptografia.'"
@@ -2557,7 +2562,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Engenharia_de_Software",
         "descricao": "Apresenta métodos e práticas para o desenvolvimento de software de alta qualidade e confiabilidade, incluindo metodologias ágeis e DevOps. Por exemplo, 'Desenvolva software de alta qualidade com metodologias ágeis e práticas de DevOps.'"
@@ -2698,7 +2704,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Redes_de_Computadores",
         "descricao": "Explica conceitos e tecnologias em redes de computadores para comunicação e interconexão de sistemas, incluindo protocolos de rede e segurança. Por exemplo, 'Projete redes de computadores eficientes e seguras utilizando as melhores práticas.'"
@@ -2839,7 +2846,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Aprendizado_Automático",
         "descricao": "Introduz o aprendizado de máquina e suas aplicações em problemas do mundo real, como classificação e regressão. Por exemplo, 'Aplique aprendizado de máquina para análise de dados e predição de resultados.'"
@@ -2980,7 +2988,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Design_de_Experiência_do_Usuário",
         "descricao": "Ensina princípios e técnicas para o design de interfaces e experiências do usuário, incluindo testes de usabilidade e design centrado no usuário. Por exemplo, 'Desenvolva interfaces de usuário intuitivas com design de experiência do usuário.'"
@@ -3121,7 +3130,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Gestão_de_Projetos_de_Tecnologia",
         "descricao": "Apresenta metodologias e práticas para gestão eficaz de projetos de tecnologia da informação, incluindo metodologias ágeis e gestão de riscos. Por exemplo, 'Gerencie projetos de TI com metodologias ágeis e práticas de gestão de riscos.'"
@@ -3262,7 +3272,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Inovação_Tecnológica",
         "descricao": "Explica processos e estratégias para promover a inovação por meio da tecnologia, incluindo desenvolvimento de novos produtos e serviços. Por exemplo, 'Desenvolva estratégias de inovação tecnológica para sua empresa e crie novos produtos.'"
@@ -3403,7 +3414,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Economia_de_Dados",
         "descricao": "Analisa o impacto econômico e estratégico de dados e tecnologias da informação, incluindo big data e economia digital. Por exemplo, 'Analise o impacto econômico de projetos de big data e estratégias de monetização de dados.'"
@@ -3544,7 +3556,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Comunicação_Técnica",
         "descricao": "Ensina técnicas e habilidades para comunicação eficaz de conceitos técnicos e científicos, incluindo redação técnica e apresentações. Por exemplo, 'Comunique resultados de pesquisas científicas de forma clara e concisa.'"
@@ -3685,7 +3698,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Desenvolvimento_de_Carreira_em_Tecnologia",
         "descricao": "Oferece estratégias e práticas para o desenvolvimento profissional em carreiras de tecnologia, incluindo planejamento de carreira e networking. Por exemplo, 'Desenvolva sua carreira em tecnologia com as melhores práticas do mercado e estratégias de networking.'"
@@ -3826,7 +3840,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "SEO_Especialista",
         "descricao": "Oferece técnicas avançadas de otimização para motores de busca (SEO) para aumentar a visibilidade e o tráfego orgânico de sites. Por exemplo, 'Implemente estratégias de SEO para melhorar o ranking do seu site nos motores de busca.'"
@@ -3967,7 +3982,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},,
     {
         "agente": "Advogado_Especialista",
         "descricao": "Fornece aconselhamento jurídico especializado em diversas áreas do direito, incluindo direito digital, propriedade intelectual e compliance. Por exemplo, 'Consulte um advogado especialista em direito digital para orientação sobre conformidade com leis de proteção de dados.'"
@@ -4108,7 +4124,8 @@
       "default_auto_reply": "",
       "descrição": null
     }
-  },
+  }
+},
     {
         "agente": "Professor_PhD_Pesquisas_Acadêmicas",
         "descricao": "Orientação especializada em pesquisas acadêmicas multidisciplinares e redação de artigos científicos, incluindo metodologias de pesquisa e publicação. Por exemplo, 'Receba orientação de um Professor PhD para redação de artigos científicos e publicação em revistas de alto impacto.'"
@@ -4250,4 +4267,5 @@
       "descrição": null
     }
   }
+}
 ]
