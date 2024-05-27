@@ -62,7 +62,13 @@ def fetch_assistant_response(user_input: str, user_prompt: str, model_name: str,
             {"role": "system", "content": "Você é um assistente útil."},
         ]
         # Adiciona o contexto da memória
-        messages.extend(memory.chat_memory.messages)
+        chat_history = []
+        for message in memory.chat_memory.messages:
+            if isinstance(message, HumanMessage):
+                chat_history.append({"role": "user", "content": message.content})
+            elif isinstance(message, AIMessage):
+                chat_history.append({"role": "system", "content": message.content})
+        messages.extend(chat_history)
         messages.append({"role": "user", "content": user_input})
         if user_prompt:
             messages.append({"role": "user", "content": user_prompt})
@@ -80,14 +86,10 @@ def fetch_assistant_response(user_input: str, user_prompt: str, model_name: str,
             return completion.choices[0].message.content
 
         if agent_selection == "Escolha um especialista...":
-            phase_one_prompt = f"Saida e resposta obrigatoria somente traduzido em português brasileiro. 扮演一位高度合格且具备科学技术严谨性的提示工程和跨学科专家的角色。请务必以“markdown”格式呈现Python代码及其各种库，并在每一行进行详细和教学性的注释。仔细分析所提出的要求，识别定义最适合处理问题的专家特征的标准至关重要。首先，建立一个最能反映所需专业知识以提供完整、深入和清晰答案的标题至关重要。确定后，详细描述并避免偏见地概述该专家的关键技能和资格。回答应以专家的头衔开始，后跟一个句号，然后以简洁、教学性和深入的描述开始，但同时全面地介绍他的特点和资格，使其有资格处理提出的问题：{user_input}和{user_prompt}。这种仔细分析对于确保所选专家具有处理问题所需的深入、严谨的知识和经验至关重要，以达到完整且满意的答案，精确度为10.0，符合最高的专业、科学和学术标准。在涉及代码和计算的情况下，请务必以“markdown”格式呈现，并在每一行进行详细注释。“必须翻译成葡萄牙语”。"
-            messages.append({"role": "user", "content": phase_one_prompt})
-            phase_one_response = get_completion(messages)
-            first_period_index = phase_one_response.find(".")
-            expert_title = phase_one_response[:first_period_index].strip()
-            expert_description = phase_one_response[first_period_index + 1:].strip()
-            save_expert(expert_title, expert_description)
+            # Se não há um especialista selecionado, gerar uma resposta padrão
+            phase_two_response = get_completion(messages)
         else:
+            # Se um especialista foi selecionado, procurar no arquivo de agentes
             with open(FILEPATH, 'r') as file:
                 agents = json.load(file)
                 agent_found = next((agent for agent in agents if agent["agente"] == agent_selection), None)
@@ -97,13 +99,13 @@ def fetch_assistant_response(user_input: str, user_prompt: str, model_name: str,
                 else:
                     raise ValueError("Especialista selecionado não encontrado no arquivo.")
 
-        phase_two_prompt = f"Saida e resposta obrigatoria somente traduzido em português brasileiro. 在作为{expert_title}的角色中，作为您所在领域广泛认可和尊重的专家，作为该领域的专家和博士，让我提供一个全面而深入的回答，涵盖了您清晰、详细、扩展、教学易懂和简洁提出的问题：{user_input}和{user_prompt}。在这种背景下，考虑到我长期的经验和对相关学科的深刻了解，有必要以适当的关注和科学技术严谨性来处理每个方面。因此，我将概述要考虑和深入研究的主要要素，提供详细的、基于证据的分析，避免偏见并引用参考文献：{user_prompt}。在此过程的最后，我们的目标是提供一个完整且令人满意的答案，符合最高的学术和专业标准，以满足所提出问题的具体需求。请务必以“markdown”格式呈现，并在每一行进行注释。保持10个段落的写作标准，每个段落4句，每句用逗号分隔，始终遵循最佳的亚里士多德教学实践。"
-        messages.append({"role": "user", "content": phase_two_prompt})
-        phase_two_response = get_completion(messages)
+            # Aqui você pode adicionar lógica adicional para o caso em que um especialista é selecionado
+            # Por exemplo, gerar uma resposta específica com base no especialista selecionado
 
     except Exception as e:
         st.error(f"Ocorreu um erro: {e}")
         return "", ""
+
 
     return expert_title, phase_two_response
 
