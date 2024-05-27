@@ -291,3 +291,10 @@ Whatsapp: (88)981587145
 Instagram: https://www.instagram.com/marceloclaro.geomaker/
 """)
 
+# Main function
+if __name__ == "__main__":
+    main()
+
+# Sponsored ad
+**Sponsored**
+Save yourself months of time with AI [People](https://api.adzedek.com/click_sylph0314?chatbot_id=1715191360448x620213882279166000&operation_hash=e5d1f590189c3628558680e3a826acfe) Search
