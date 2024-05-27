@@ -228,7 +228,7 @@ if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 else:
     for message in st.session_state.chat_history:
-        memory.save_context(message['human'], message['AI'])
+        memory.save_context({"human_input": message['human']}, {"output": message['AI']})
 
 container_saida = st.container()
 
