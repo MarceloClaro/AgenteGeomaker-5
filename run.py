@@ -14,9 +14,13 @@ from langchain.chains.conversation.memory import ConversationBufferWindowMemory
 from langchain_groq import ChatGroq
 from langchain.prompts import PromptTemplate
 
+# Configura o layout da página para ser "wide"
 st.set_page_config(layout="wide")
 
+# Define o caminho do arquivo JSON que contém os especialistas
 FILEPATH = "agents.json"
+
+# Dicionário que define o número máximo de tokens para diferentes modelos
 MODEL_MAX_TOKENS = {
     'mixtral-8x7b-32768': 32768,
     'llama3-70b-8192': 8192,
@@ -25,6 +29,7 @@ MODEL_MAX_TOKENS = {
     'gemma-7b-it': 8192,
 }
 
+# Carrega as opções de especialistas a partir do arquivo JSON
 def load_agent_options() -> list:
     agent_options = ['Escolher um especialista...']
     if os.path.exists(FILEPATH):
@@ -36,12 +41,15 @@ def load_agent_options() -> list:
                 st.error("Erro ao ler o arquivo de agentes. Por favor, verifique o formato.")
     return agent_options
 
+# Retorna o número máximo de tokens para o modelo selecionado
 def get_max_tokens(model_name: str) -> int:
     return MODEL_MAX_TOKENS.get(model_name, 4096)
 
+# Função para recarregar a página
 def refresh_page():
     st.rerun()
 
+# Salva um novo especialista no arquivo JSON
 def save_expert(expert_title: str, expert_description: str):
     with open(FILEPATH, 'r+') as file:
         agents = json.load(file) if os.path.getsize(FILEPATH) > 0 else []
@@ -50,29 +58,30 @@ def save_expert(expert_title: str, expert_description: str):
         json.dump(agents, file, indent=4)
         file.truncate()
 
+# Busca a resposta do assistente com base nas entradas do usuário
 def fetch_assistant_response(user_input: str, user_prompt: str, model_name: str, temperature: float, agent_selection: str, groq_api_key: str, memory) -> Tuple[str, str]:
     phase_two_response = ""
     expert_title = ""
 
     try:
-        client = Groq(api_key=groq_api_key)
+        client = Groq(api_key=groq_api_key)  # Cria um cliente Groq com a chave API fornecida
 
         # Constrói o prompt incluindo o contexto da memória
-        messages = [
-            {"role": "system", "content": "Você é um assistente útil."},
-        ]
-        # Adiciona o contexto da memória
+        messages = [{"role": "system", "content": "Você é um assistente útil."}]
         chat_history = []
+
         for message in memory.chat_memory.messages:
             if isinstance(message, HumanMessage):
                 chat_history.append({"role": "user", "content": message.content})
             elif isinstance(message, AIMessage):
                 chat_history.append({"role": "system", "content": message.content})
+
         messages.extend(chat_history)
         messages.append({"role": "user", "content": user_input})
         if user_prompt:
             messages.append({"role": "user", "content": user_prompt})
 
+        # Função interna para obter uma conclusão da API Groq
         def get_completion(messages: list) -> str:
             completion = client.chat.completions.create(
                 messages=messages,
@@ -85,7 +94,7 @@ def fetch_assistant_response(user_input: str, user_prompt: str, model_name: str,
             )
             return completion.choices[0].message.content
 
-        if agent_selection == "Escolha um especialista...":
+        if agent_selection == "Escolher um especialista...":
             # Se não há um especialista selecionado, gerar uma resposta padrão
             phase_two_response = get_completion(messages)
         else:
@@ -106,13 +115,14 @@ def fetch_assistant_response(user_input: str, user_prompt: str, model_name: str,
         st.error(f"Ocorreu um erro: {e}")
         return "", ""
 
-
     return expert_title, phase_two_response
 
+# Refina a resposta obtida anteriormente
 def refine_response(expert_title: str, phase_two_response: str, user_input: str, user_prompt: str, model_name: str, temperature: float, groq_api_key: str, references_file):
     try:
         client = Groq(api_key=groq_api_key)
 
+        # Função interna para obter uma conclusão da API Groq
         def get_completion(messages: list) -> str:
             completion = client.chat.completions.create(
                 messages=messages,
@@ -142,10 +152,12 @@ def refine_response(expert_title: str, phase_two_response: str, user_input: str,
         st.error(f"Ocorreu um erro durante o refinamento: {e}")
         return ""
 
+# Avalia a resposta utilizando o Rational Agent Generator (RAG)
 def evaluate_response_with_rag(user_input: str, user_prompt: str, expert_description: str, assistant_response: str, model_name: str, temperature: float, groq_api_key: str) -> str:
     try:
         client = Groq(api_key=groq_api_key)
 
+        # Função interna para obter uma conclusão da API Groq
         def get_completion(messages: list) -> str:
             completion = client.chat.completions.create(
                 messages=messages,
@@ -170,19 +182,17 @@ def evaluate_response_with_rag(user_input: str, user_prompt: str, expert_descrip
         st.error(f"Ocorreu um erro durante a avaliação com RAG: {e}")
         return ""
 
+# Carrega as opções de especialistas disponíveis
 agent_options = load_agent_options()
 
-st.image('updating.gif', width=300, caption='Laboratário de Educação e Inteligência Artificial - Geomaker.', use_column_width='always', output_format='auto')
+# Elementos visuais da interface do usuário
+st.image('updating.gif', width=300, caption='Laboratório de Educação e Inteligência Artificial - Geomaker.', use_column_width='always', output_format='auto')
 st.markdown("<h1 style='text-align: center;'>Agentes Experts Geomaker</h1>", unsafe_allow_html=True)
-
 st.markdown("<h2 style='text-align: center;'>Utilize o Rational Agent Generator (RAG) para avaliar a resposta do especialista e garantir qualidade e precisão.</h2>", unsafe_allow_html=True)
 
 st.markdown("<hr>", unsafe_allow_html=True)
-# Título da caixa de informação
-
 st.markdown("<h2 style='text-align: center;'>Descubra como nossa plataforma pode revolucionar a educação.</h2>", unsafe_allow_html=True)
 
-# Conteúdo da caixa de informação
 with st.expander("Clique para saber mais sobre os Agentes Experts Geomaker."):
     st.write("1. **Conecte-se instantaneamente com especialistas:** Imagine ter acesso direto a especialistas em diversas áreas do conhecimento, prontos para responder às suas dúvidas e orientar seus estudos e pesquisas.")
     st.write("2. **Aprendizado personalizado e interativo:** Receba respostas detalhadas e educativas, adaptadas às suas necessidades específicas, tornando o aprendizado mais eficaz e envolvente.")
@@ -191,8 +201,10 @@ with st.expander("Clique para saber mais sobre os Agentes Experts Geomaker."):
     st.write("5. **Desenvolvimento profissional e acadêmico:** Professores podem encontrar recursos e orientações para melhorar suas práticas de ensino, enquanto pesquisadores podem obter insights valiosos para suas investigações.")
     st.write("6. **Inovação e tecnologia educacional:** Nossa plataforma incorpora as mais recentes tecnologias para proporcionar uma experiência educacional moderna e eficiente.")
 
+# Instrução para o usuário inserir sua solicitação
 st.write("Digite sua solicitação para que ela seja respondida pelo especialista ideal.")
 
+# Cria duas colunas para disposição dos elementos na interface
 col1, col2 = st.columns(2)
 
 with col1:
@@ -205,7 +217,8 @@ with col1:
     max_tokens = get_max_tokens(model_name)
     st.write(f"Número Máximo de Tokens para o modelo selecionado: {max_tokens}")
 
-    conversational_memory_length = st.sidebar.slider('Conversational memory length:', 1, 10, value=5)
+    # Slider para ajustar o comprimento da memória conversacional
+    conversational_memory_length = st.sidebar.slider('Comprimento da memória conversacional:', 1, 10, value=5)
     memory = ConversationBufferWindowMemory(k=conversational_memory_length, memory_key="chat_history", return_messages=True)
 
     fetch_clicked = st.button("Buscar Resposta")
@@ -215,6 +228,7 @@ with col1:
 
     references_file = st.file_uploader("Upload do arquivo JSON com referências (opcional)", type="json", key="arquivo_referencias")
 
+# Inicializa variáveis de sessão para armazenar respostas e descrições
 if 'resposta_assistente' not in st.session_state:
     st.session_state.resposta_assistente = ""
 if 'descricao_especialista_ideal' not in st.session_state:
@@ -225,7 +239,6 @@ if 'resposta_original' not in st.session_state:
     st.session_state.resposta_original = ""
 if 'rag_resposta' not in st.session_state:
     st.session_state.rag_resposta = ""
-
 if 'chat_history' not in st.session_state:
     st.session_state.chat_history = []
 else:
@@ -240,6 +253,7 @@ else:
 
 container_saida = st.container()
 
+# Executa a busca da resposta quando o botão "Buscar Resposta" é clicado
 if fetch_clicked:
     if references_file is None:
         st.warning("Não foi fornecido um arquivo de referências. Certifique-se de fornecer uma resposta detalhada e precisa, mesmo sem o uso de fontes externas. Saída sempre traduzido para o portugues brasileiro com tom profissional.")
@@ -249,6 +263,7 @@ if fetch_clicked:
     st.session_state.chat_history.append({'type': 'human', 'content': user_input})
     st.session_state.chat_history.append({'type': 'ai', 'content': st.session_state.resposta_assistente})
 
+# Refina a resposta quando o botão "Refinar Resposta" é clicado
 if refine_clicked:
     if st.session_state.resposta_assistente:
         st.session_state.resposta_refinada = refine_response(st.session_state.descricao_especialista_ideal, st.session_state.resposta_assistente, user_input, user_prompt, model_name, temperature, groq_api_key, references_file)
@@ -257,6 +272,7 @@ if refine_clicked:
     else:
         st.warning("Por favor, busque uma resposta antes de refinar.")
 
+# Avalia a resposta utilizando o RAG quando o botão "Avaliar Resposta com RAG" é clicado
 if evaluate_clicked:
     if st.session_state.resposta_assistente and st.session_state.descricao_especialista_ideal:
         st.session_state.rag_resposta = evaluate_response_with_rag(user_input, user_prompt, st.session_state.descricao_especialista_ideal, st.session_state.resposta_assistente, model_name, temperature, groq_api_key)
@@ -265,6 +281,7 @@ if evaluate_clicked:
     else:
         st.warning("Por favor, busque uma resposta e forneça uma descrição do especialista antes de avaliar com RAG.")
 
+# Exibe as respostas e análises
 with container_saida:
     st.write(f"**Análise do Especialista:**\n{st.session_state.descricao_especialista_ideal}")
     st.write(f"\n**Resposta do Especialista:**\n{st.session_state.resposta_original}")
@@ -273,6 +290,7 @@ with container_saida:
     if st.session_state.rag_resposta:
         st.write(f"\n**Avaliação com RAG:**\n{st.session_state.rag_resposta}")
 
+# Apaga o estado da sessão e recarrega a página quando o botão "Apagar" é clicado
 if refresh_clicked:
     st.session_state.clear()
     st.experimental_rerun()
@@ -282,7 +300,7 @@ st.sidebar.image("logo.png", width=200)
 
 st.sidebar.title("Manual de Uso")
 st.sidebar.write("1. Digite sua solicitação na caixa de texto. Isso será usado para solicitar uma resposta de um especialista.")
-st.sidebar.write("2. Escolha um especialista da lista ou crie um novo. Se você escolher 'Criar (ou escolher) um especialista...', você será solicitado a descrever as características do especialista.")
+st.sidebar.write("2. Escolha um especialista da lista ou crie um novo. Se você escolher 'Escolher um especialista...', você será solicitado a descrever as características do especialista.")
 st.sidebar.write("3. Escolha um modelo de resposta da lista. Cada modelo possui diferentes capacidades e complexidades.")
 st.sidebar.write("4. Ajuste o nível de criatividade do modelo com o controle deslizante. Um valor mais alto produzirá respostas mais criativas e menos previsíveis.")
 st.sidebar.write("5. Faça o upload de um arquivo JSON com referências para a resposta, se disponível. Isso ajudará o especialista a fornecer uma resposta mais fundamentada.")
@@ -299,5 +317,5 @@ Contatos: marceloclaro@gmail.com
 
 Whatsapp: (88)981587145
 
-Instagram: https://www.instagram.com/marceloclaro.geomaker/
+Instagram: [https://www.instagram.com/marceloclaro.geomaker/](https://www.instagram.com/marceloclaro.geomaker/)
 """)
