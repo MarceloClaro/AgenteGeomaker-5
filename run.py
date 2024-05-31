@@ -3,7 +3,6 @@ import json
 import streamlit as st
 from typing import Tuple
 from crewai import Agent, Task, Crew, Process
-from crewai_tools import BaseTool  # Certifique-se de que os tools estão disponíveis.
 from langchain.chat_models import ChatOpenAI  # Certifique-se de que o ChatOpenAI está disponível.
 from groq import Groq
 
@@ -138,7 +137,6 @@ def create_agent(index):
             f'extensa experiência em resolver problemas complexos. Seu objetivo é '
             f'fornecer a melhor solução possível para o problema apresentado.'
         ),
-        tools=[BaseTool(name="Tool", description="A base tool for demonstration purposes.")],
         llm=ChatOpenAI(model="gpt-3.5-turbo")  # Ajuste o modelo conforme necessário
     )
 
@@ -156,7 +154,7 @@ def create_task(agent, index):
 
 # Função para executar as rodadas de debate
 def execute_debate(crew, rounds):
-    for round in range(1, rounds + 1):
+    for round in range(1, rounds + 30):
         st.write(f"Iniciando rodada {round}")
         result = crew.kickoff(inputs={'problema': st.session_state["problema_usuario"]})
         st.write(f"Resultado da rodada {round}: {result}")
