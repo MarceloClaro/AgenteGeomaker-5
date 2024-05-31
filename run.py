@@ -37,7 +37,7 @@ def get_max_tokens(model_name: str) -> int:
 
 # Função para recarregar a página do Streamlit.
 def refresh_page():
-    st.rerun()
+    st.experimental_rerun()
 
 # Função para salvar um novo especialista no arquivo JSON.
 def save_expert(expert_title: str, expert_description: str):
@@ -77,9 +77,8 @@ def fetch_assistant_response(user_input: str, user_prompt: str, model_name: str,
                 "Assuma o papel de um especialista altamente qualificado em engenharia de prompts e com rigor científico. "
                 "Por favor, apresente o código Python com suas bibliotecas respectivas em formato 'markdown' e com comentários detalhados e educacionais em cada linha. "
                 "Analise cuidadosamente o requisito apresentado, identificando os critérios que definem as características do especialista mais adequado para lidar com a questão. "
-                "Primeiramente, é essencial estabelecer um título que melhor reflita a expertise necessária para fornecer uma resposta completa, aprofundada e clara. "
-                "Depois de determinado, descreva minuciosamente as principais habilidades e qualificações desse especialista, evitando vieses. "
-                "A resposta deve iniciar com o título do especialista, seguido de um ponto final, e então começar com uma descrição clara, educacional e aprofundada, "
+                "Primeiramente, é essencial estabelecer um título que melhor reflita a expertise necessária para fornecer uma resposta completa, aprofundada e clara, "
+                "a descrição do especialista deve ser clara, educacional e aprofundada, "
                 "que apresente suas características e qualificações que o tornam aptos a lidar com a questão proposta: {user_input} e {user_prompt}. "
                 "Essa análise detalhada é crucial para garantir que o especialista selecionado possua o conhecimento e a experiência necessários para fornecer uma resposta "
                 "completa e satisfatória, com precisão de 10.0, alinhada aos mais altos padrões profissionais, científicos e acadêmicos. "
