@@ -212,5 +212,3 @@ Whatsapp: (88)981587145
 Instagram: [https://www.instagram.com/marceloclaro.geomaker/](https://www.instagram.com/marceloclaro.geomaker/)
 """)
 
-if __name__ == "__main__":
-    main()
