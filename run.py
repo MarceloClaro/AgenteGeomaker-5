@@ -1,9 +1,10 @@
 import os
 import json
 import streamlit as st
-from streamlit.delta_generator import DeltaGenerator
 from typing import Tuple
 from crewai import Agent, Task, Crew, Process
+from crewai_tools import BaseTool  # Certifique-se de que os tools estão disponíveis.
+from langchain.chat_models import ChatOpenAI  # Certifique-se de que o ChatOpenAI está disponível.
 from groq import Groq
 
 # Configurações de API
@@ -81,7 +82,7 @@ def fetch_assistant_response(user_input: str, user_prompt: str, model_name: str,
                 "Primeiramente, é essencial estabelecer um título que melhor reflita a expertise necessária para fornecer uma resposta completa, aprofundada e clara. "
                 "Depois de determinado, descreva minuciosamente as principais habilidades e qualificações desse especialista, evitando vieses. "
                 "A resposta deve iniciar com o título do especialista, seguido de um ponto final, e então começar com uma descrição clara, educacional e aprofundada, "
-                "que apresente suas características e qualificações que o tornam apto a lidar com a questão proposta: {user_input} e {user_prompt}. "
+                "que apresente suas características e qualificações que o tornam aptos a lidar com a questão proposta: {user_input} e {user_prompt}. "
                 "Essa análise detalhada é crucial para garantir que o especialista selecionado possua o conhecimento e a experiência necessários para fornecer uma resposta "
                 "completa e satisfatória, com precisão de 10.0, alinhada aos mais altos padrões profissionais, científicos e acadêmicos. "
                 "Nos casos que envolvam código e cálculos, apresente em formato 'markdown' e com comentários detalhados em cada linha. "
@@ -137,8 +138,8 @@ def create_agent(index):
             f'extensa experiência em resolver problemas complexos. Seu objetivo é '
             f'fornecer a melhor solução possível para o problema apresentado.'
         ),
-        tools=[],  # Adicione ferramentas conforme necessário
-        allow_delegation=False
+        tools=[BaseTool(name="Tool", description="A base tool for demonstration purposes.")],
+        llm=ChatOpenAI(model="gpt-3.5-turbo")  # Ajuste o modelo conforme necessário
     )
 
 # Função para criar uma tarefa para cada agente
@@ -161,54 +162,56 @@ def execute_debate(crew, rounds):
         st.write(f"Resultado da rodada {round}: {result}")
         st.write("Pressione Enter para continuar para a próxima rodada...")
 
-# Interface do Streamlit
-st.image('updating.gif', width=300, caption='Laboratório de Educação e Inteligência Artificial - Geomaker. "A melhor forma de prever o futuro é inventá-lo." - Alan Kay', use_column_width='always', output_format='auto')
-st.markdown("<h1 style='text-align: center;'>Agentes Alan Kay</h1>", unsafe_allow_html=True)
-st.markdown("<h2 style='text-align: center;'>Utilize o Rational Agent Generator (RAG) para avaliar a resposta do especialista e garantir qualidade e precisão.</h2>", unsafe_allow_html=True)
-st.markdown("<hr>", unsafe_allow_html=True)
+def main():
+    st.image('updating.gif', width=300, caption='Laboratório de Educação e Inteligência Artificial - Geomaker. "A melhor forma de prever o futuro é inventá-lo." - Alan Kay', use_column_width='always', output_format='auto')
+    st.markdown("<h1 style='text-align: center;'>Agentes Alan Kay</h1>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>Utilize o Rational Agent Generator (RAG) para avaliar a resposta do especialista e garantir qualidade e precisão.</h2>", unsafe_allow_html=True)
+    st.markdown("<hr>", unsafe_allow_html=True)
 
-st.write("Digite sua solicitação para que ela seja respondida pelo especialista ideal.")
+    st.write("Digite sua solicitação para que ela seja respondida pelo especialista ideal.")
 
-user_input = st.text_area("Por favor, insira sua solicitação:", height=200, key="entrada_usuario")
-user_prompt = st.text_area("Escreva um prompt ou coloque o texto para consulta para o especialista (opcional):", height=200, key="prompt_usuario")
-agent_selection = st.selectbox("Escolha um Especialista", options=load_agent_options(), index=0, key="selecao_agente")
-model_name = st.selectbox("Escolha um Modelo", list(MODEL_MAX_TOKENS.keys()), index=0, key="nome_modelo")
-temperature = st.slider("Nível de Criatividade", min_value=0.0, max_value=1.0, value=0.0, step=0.01, key="temperatura")
-groq_api_key = st.text_input("Chave da API Groq: Você pode usar esse como teste - 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 ", key="groq_api_key")
+    user_input = st.text_area("Por favor, insira sua solicitação:", height=200, key="entrada_usuario")
+    user_prompt = st.text_area("Escreva um prompt ou coloque o texto para consulta para o especialista (opcional):", height=200, key="prompt_usuario")
+    agent_selection = st.selectbox("Escolha um Especialista", options=load_agent_options(), index=0, key="selecao_agente")
+    model_name = st.selectbox("Escolha um Modelo", list(MODEL_MAX_TOKENS.keys()), index=0, key="nome_modelo")
+    temperature = st.slider("Nível de Criatividade", min_value=0.0, max_value=1.0, value=0.0, step=0.01, key="temperatura")
+    groq_api_key = st.text_input("Chave da API Groq: Você pode usar esse como teste - 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 ", key="groq_api_key")
 
-if st.button("Buscar Resposta"):
-    if not user_input:
-        st.warning("Por favor, insira sua solicitação.")
-    else:
-        st.session_state["problema_usuario"] = user_input
-        st.session_state["descricao_especialista_ideal"], st.session_state["resposta_assistente"] = fetch_assistant_response(user_input, user_prompt, model_name, temperature, agent_selection, groq_api_key)
+    if st.button("Buscar Resposta"):
+        if not user_input:
+            st.warning("Por favor, insira sua solicitação.")
+        else:
+            st.session_state["problema_usuario"] = user_input
+            st.session_state["descricao_especialista_ideal"], st.session_state["resposta_assistente"] = fetch_assistant_response(user_input, user_prompt, model_name, temperature, agent_selection, groq_api_key)
 
-        # Configuração dos agentes
-        agents = [create_agent(i) for i in range(1, 10)]
-        tasks = [create_task(agent, i) for i, agent in enumerate(agents, 1)]
+            # Configuração dos agentes
+            agents = [create_agent(i) for i in range(1, 10)]
+            tasks = [create_task(agent, i) for i, agent in enumerate(agents, 1)]
 
-        # Configuração do processo de debate
-        crew = Crew(
-            agents=agents,
-            tasks=tasks,
-            process=Process.sequential
-        )
+            # Configuração do processo de debate
+            crew = Crew(
+                agents=agents,
+                tasks=tasks,
+                process=Process.sequential
+            )
 
-        execute_debate(crew, 30)
+            execute_debate(crew, 30)
 
-if st.button("Apagar"):
-    st.session_state.clear()
-    st.experimental_rerun()
+    if st.button("Apagar"):
+        st.session_state.clear()
+        st.experimental_rerun()
 
-st.sidebar.image("logo.png", width=200)
-st.sidebar.write("""
-Projeto Geomaker + IA 
-- Professor: Marcelo Claro.
+    st.sidebar.image("logo.png", width=200)
+    st.sidebar.write("""
+    Projeto Geomaker + IA 
+    - Professor: Marcelo Claro.
 
-Contatos: marceloclaro@gmail.com
+    Contatos: marceloclaro@gmail.com
 
-Whatsapp: (88)981587145
+    Whatsapp: (88)981587145
 
-Instagram: [https://www.instagram.com/marceloclaro.geomaker/](https://www.instagram.com/marceloclaro.geomaker/)
-""")
+    Instagram: [https://www.instagram.com/marceloclaro.geomaker/](https://www.instagram.com/marceloclaro.geomaker/)
+    """)
 
+if __name__ == "__main__":
+    main()
