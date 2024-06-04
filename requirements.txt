@@ -1,7 +1,9 @@
 fitz
 crewai
-streamlit
-groq
+streamlit==1.34.0
+groq==0.5.0
+toml==0.10.2
+pydub
 toml==0.10.2
 pydub
 aiohttp==3.9.3
