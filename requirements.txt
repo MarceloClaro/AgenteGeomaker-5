@@ -5,6 +5,5 @@ Pillow==8.4.0
 fitz==0.0.1.dev2
 configparser==5.2.0
 tenacity==8.0.1
-tiktoken==0.0.1
-groq==0.3.0
-openai==0.12.0
+tiktoken==0.1.1
+
