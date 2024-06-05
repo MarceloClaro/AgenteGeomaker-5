@@ -6,7 +6,7 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 from collections import namedtuple
-import fitz
+import fitz  # PyMuPDF
 import io
 from PIL import Image
 import re
@@ -200,7 +200,7 @@ class Paper:
                 else:
                     end_page = len(text_list)
                 cur_sec_text = ''
-                if end_page - start_page == 0:
+                if start_page == end_page:
                     if sec_index < len(list(self.section_page_dict.keys())) - 1:
                         next_sec = list(self.section_page_dict.keys())[sec_index + 1]
                         if text_list[start_page].find(sec_name) == -1:
@@ -412,7 +412,6 @@ class Reader:
                         offset = int(str(e)[current_tokens_index:current_tokens_index + 4])
                         method_prompt_token = offset + 800 + 150
                         chat_method_text = self.chat_method(text=text, method_prompt_token=method_prompt_token)
-
                 if "chat_method_text" in locals():
                     htmls.append(chat_method_text)
             else:
@@ -568,13 +567,10 @@ class Reader:
              "content": "This is the title, author, link, abstract and introduction of an English document. I need your help to read and summarize the following questions: " + clip_text},
             {"role": "user", "content": """
                  1. Mark the title of the paper (with Chinese translation)
-                 2. list all the authors' names (use English)
-                 3. mark the first author's affiliation (output {} translation only)
-                 4. mark the keywords of this article (use English)
-                 5. link to the paper, Github code link (if available, fill in Github:None if not)
-                 6. summarize according to the following four points.Be sure to use {} answers (proper nouns need to be marked in English)
-                    - (1):What is the research background of this article?
-                    - (2):What are the past methods? What are the problems with them? Is the approach well motivated?
+                 2. list all the authors and their institution affiliations.
+                 3. Summarize the paper in a concise manner, listing the following information.
+                    - (1):What is the motivation of this research?
+                    - (2):What are the problems with the past methods? What are the problems with them? Is the approach well motivated?
                     - (3):What is the research methodology proposed in this paper?
                     - (4):On what task and what performance is achieved by the methods in this paper? Can the performance support their goals?
                  Follow the format of the output that follows:
@@ -590,9 +586,8 @@ class Reader:
                     - (4):xxx.\n\n
 
                  Be sure to use {} answers (proper nouns need to be marked in English), statements as concise and academic as possible, do not have too much repetitive information, numerical values using the original numbers, be sure to strictly follow the format, the corresponding content output to xxx, in accordance with \n line feed.
-                 """.format(self.language, self.language, self.language)},
+                 """.format(self.language, self.language)},
         ]
-
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo",
             messages=messages,
@@ -768,9 +763,7 @@ user_prompt = st.text_area("Digite o prompt adicional (opcional):")
 agent_selection = st.selectbox("Escolha um Especialista", options=agent_options)
 model_name = st.selectbox("Escolha um Modelo", list(MODEL_MAX_TOKENS.keys()))
 temperature = st.slider("Nível de Criatividade", 0.0, 1.0, 0.5)
-groq_api_key = st.text_input("Chave da API Groq", type="password")
-max_tokens = get_max_tokens(model_name)
-st.write(f"Número Máximo de Tokens: {max_tokens}")
+groq_api_key = st.text_input("Chave da API Groq")
 
 if st.button("Buscar Resposta"):
     expert_title, response = fetch_assistant_response(user_input, user_prompt, model_name, temperature, agent_selection, groq_api_key)
