@@ -8,3 +8,4 @@ tenacity==8.0.1
 tiktoken==0.1.1
 frontend
 PyMuPDF
+groq
