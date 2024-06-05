@@ -34,7 +34,7 @@ ArxivParams = namedtuple(
 )
 
 class Paper:
-    def __init__(self, path, title='', url='', abs='', authers=[]):
+    def __init__(self, path, title='', url='', abs='', authors=[]):
         self.url = url
         self.path = path
         self.section_names = []
@@ -44,7 +44,7 @@ class Paper:
         self.title = title
         self.pdf = fitz.open(self.path)
         self.parse_pdf()
-        self.authers = authers
+        self.authors = authors
         self.roman_num = ["I", "II", 'III', "IV", "V", "VI", "VII", "VIII", "IIX", "IX", "X"]
         self.digit_num = [str(d + 1) for d in range(10)]
         self.first_image = ''
