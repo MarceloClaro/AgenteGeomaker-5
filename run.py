@@ -34,7 +34,7 @@ ArxivParams = namedtuple(
 )
 
 class Paper:
-    def __init__(self, path, title='', url='', abs='', authers=[]):
+    def __init__(self, path, title='', url='', abs='', authors=[]):
         self.url = url
         self.path = path
         self.section_names = []
@@ -44,7 +44,7 @@ class Paper:
         self.title = title
         self.pdf = fitz.open(self.path)
         self.parse_pdf()
-        self.authers = authers
+        self.authors = authors
         self.roman_num = ["I", "II", 'III', "IV", "V", "VI", "VII", "VIII", "IIX", "IX", "X"]
         self.digit_num = [str(d + 1) for d in range(10)]
         self.first_image = ''
@@ -150,7 +150,7 @@ class Paper:
                         cur_string = block["lines"][0]["spans"][0]["text"]
                         font_flags = block["lines"][0]["spans"][0]["flags"]
                         font_size = block["lines"][0]["spans"][0]["size"]
-                        if abs(font_size - max_font_sizes[-1]) < 0.3 ou abs(font_size - max_font_sizes[-2]) < 0.3:
+                        if abs(font_size - max_font_sizes[-1]) < 0.3 or abs(font_size - max_font_sizes[-2]) < 0.3:
                             if len(cur_string) > 4 and "arXiv" not in cur_string:
                                 if cur_title == '':
                                     cur_title += cur_string
@@ -465,7 +465,7 @@ class Reader:
     @tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
-    def chat_conclusion(self, text, model_name, conclusion_prompt_token=800):
+    def chat_conclusion(self, text, conclusion_prompt_token=800):
         openai.api_key = self.chat_api_list[self.cur_api]
         self.cur_api += 1
         self.cur_api = 0 if self.cur_api >= len(self.chat_api_list) - 1 else self.cur_api
@@ -508,7 +508,7 @@ class Reader:
     @tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
-    def chat_method(self, text, model_name, method_prompt_token=800):
+    def chat_method(self, text, method_prompt_token=800):
         openai.api_key = self.chat_api_list[self.cur_api]
         self.cur_api += 1
         self.cur_api = 0 if self.cur_api >= len(self.chat_api_list) - 1 else self.cur_api
@@ -553,7 +553,7 @@ class Reader:
     @tenacity.retry(wait=tenacity.wait_exponential(multiplier=1, min=4, max=10),
                     stop=tenacity.stop_after_attempt(5),
                     reraise=True)
-    def chat_summary(self, text, model_name, summary_prompt_token=1100):
+    def chat_summary(self, text, summary_prompt_token=1100):
         openai.api_key = self.chat_api_list[self.cur_api]
         self.cur_api += 1
         self.cur_api = 0 if self.cur_api >= len(self.chat_api_list) - 1 else self.cur_api
