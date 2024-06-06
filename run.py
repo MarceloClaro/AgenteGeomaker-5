@@ -6,7 +6,6 @@ import datetime
 import requests
 from bs4 import BeautifulSoup
 from collections import namedtuple
-import fitz  # PyMuPDF
 import io
 from PIL import Image
 import re
@@ -27,6 +26,13 @@ MODEL_MAX_TOKENS = {
     'llama3-8b-8192': 8192,
     'gemma-7b-it': 8192,
 }
+
+# Verificação e criação do diretório necessário
+STATIC_DIRECTORY = 'static'
+if not os.path.exists(STATIC_DIRECTORY):
+    os.makedirs(STATIC_DIRECTORY)
+
+import fitz  # PyMuPDF
 
 ArxivParams = namedtuple(
     "ArxivParams",
@@ -492,7 +498,7 @@ class Reader:
                  """.format(self.language, self.language)},
         ]
         response = openai.ChatCompletion.create(
-            model=model_name,
+            model="gpt-3.5-turbo",
             messages=messages,
         )
         result = ''
@@ -537,7 +543,7 @@ class Reader:
                  """.format(self.language, self.language)},
         ]
         response = openai.ChatCompletion.create(
-            model=model_name,
+            model="gpt-3.5-turbo",
             messages=messages,
         )
         result = ''
@@ -589,7 +595,7 @@ class Reader:
                  """.format(self.language, self.language)},
         ]
         response = openai.ChatCompletion.create(
-            model=model_name,
+            model="gpt-3.5-turbo",
             messages=messages,
         )
         result = ''
